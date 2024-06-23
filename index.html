@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jQuery Project</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #333;
+            color: white;
+            font-size: 16px;
+            font-family: 'Courier New', Courier, monospace;
+            min-height: 100vh;
+            background-image: url("./assets/bg.png");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: relative;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            backdrop-filter: blur(12px);
+            z-index: -1;
+        }
+
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        main {
+            width: 100%;
+            padding: 2em 1em;
+
+        }
+
+        h1 {
+            font-size: 3.25em;
+            text-align: center;
+            letter-spacing: 0.15em;
+            margin-bottom: 1em;
+        }
+
+        .button {
+            border: none;
+            outline: none;
+            color: white;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .primary {
+            background-color: blueviolet;
+            font-size: 1.25em;
+            padding: 1em 2.5em;
+            border-radius: 1em;
+        }
+
+        .loader {
+            margin: 1em 0;
+            animation: fade 1.2s infinite ease-in-out;
+            display: none;
+        }
+
+        .info {
+            margin-top: 1.25em;
+            display: none;
+        }
+
+        .secondary {
+            font-size: 0.8em;
+            background-color: coral;
+            padding: 0.75em 1em;
+            border-radius: 0.5em;
+        }
+
+        img {
+            width: 10em;
+            height: 10em;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 50%;
+            border: 2px solid wheat
+        }
+
+        p {
+            text-align: center;
+            font-size: 1.25em;
+            margin: 0.5em 0;
+        }
+
+        .affiliations {
+            margin-bottom: 0.75em;
+            display: flex;
+            align-items: start;
+            gap: 0.25em;
+        }
+
+        .affiliations h3 {
+            text-align: center;
+            font-size: 1.5em;
+            text-transform: uppercase;
+            margin-bottom: 0.5em;
+            text-orientation: sideways;
+            writing-mode: vertical-lr;
+        }
+
+        .affiliations ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            padding: 0.75em 0.25em;
+            background-color: wheat;
+            margin-bottom: 0.5em;
+            color: #333;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        @keyframes fade {
+            0% {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="flex-col">
+
+        <h1>Random Starwars</h1>
+
+        <button class="button primary">Get a starwar!</button>
+
+        <p class="loader">Loading...</p>
+        <div class="info">
+            <img src="../../bootstrap/project/assets/avatar.jpg" alt="">
+            <p>name</p>
+            <div class="affiliations">
+                <h3>Affiliations</h3>
+                <ul>
+
+                </ul>
+            </div>
+            <a class="button secondary">More info</a>
+        </div>
+    </main>
+
+    <script src="
+    https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js
+    "></script>
+
+    <script>
+        const $primaryBtn = $('.primary')
+        const $infoContainer = $('.info')
+        const $loader = $('.loader')
+
+        const getRandomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
+
+        const fetchData = () => {
+            const randomNumber = getRandomNumber(1, 88)
+            console.log(randomNumber)
+            $.ajax({
+                url: `https://akabab.github.io/starwars-api/api/id/${randomNumber}.json`,
+                method: "get",
+                beforeSend: () => {
+                    $primaryBtn.attr("disabled", true)
+                    $loader.show()
+                    $infoContainer.hide()
+                    $infoContainer.css('display', 'none')
+                },
+                success: (data) => {
+                    const name = data['name']
+                    const wiki = data['wiki']
+                    const imageUrl = data['image']
+                    const affiliationsList = data['affiliations']
+
+                    $loader.hide()
+                    $infoContainer.css('display', 'flex')
+                    $infoContainer.addClass('flex-col')
+                    $infoContainer.children('img').attr('src', imageUrl).attr("alt", name)
+                    $infoContainer.children('p').text(name)
+                    $infoContainer.children('a').attr('href', wiki).attr('target', '_blank')
+
+                    const $affiliations = $infoContainer.children('.affiliations')
+                    if (affiliationsList && affiliationsList.length > 0) {
+                        $affiliations.show()
+                        const $affiliationsContainer = $affiliations.children('ul')
+                        affiliationsList.forEach(item => {
+
+                            $affiliationsContainer.append(`<li>${item}</li>`)
+                        });
+                    } else {
+                        $affiliations.hide()
+                    }
+
+                    $primaryBtn.removeAttr("disabled")
+
+                }
+            })
+        }
+
+        $primaryBtn.on('click', fetchData)
+    </script>
+
+</body>
+
+</html>
